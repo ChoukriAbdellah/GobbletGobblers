@@ -44,7 +44,7 @@ def initExemple():
     plateau[(0,0)].append(grandeCaseOrange)
     plateau[(1,1)].append(grandeCaseOrange)
     plateau[(2,2)].append(grandeCaseOrange)
-#pour l'exemple on rajoute 2 pièces à la case 0,0
+    #Pour l'exemple on met des pièces oranges sur une diagonale (pour tester la fonction qui teste la condition de victoire)
         
 def getCouleur(x,y,numPiece):
     global plateau
