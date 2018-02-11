@@ -105,6 +105,7 @@ def verifVictoire():
     1 O O O
     2 O O O
     (Y)
+    """
 
 
 initPlateau()
