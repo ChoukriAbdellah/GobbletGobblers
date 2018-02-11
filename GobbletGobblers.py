@@ -98,6 +98,13 @@ def verifVictoire():
     #Diagonales :
     checkLigne(0,0,1,1,2,2)
     checkLigne(2,0,1,1,0,2)
+    
+    """ On considère qu'on note le plateau de jeu dans un plan de cette façon (avec O représentant les cases):
+      0 1 2 (X)
+    0 O O O
+    1 O O O
+    2 O O O
+    (Y)
 
 
 initPlateau()
