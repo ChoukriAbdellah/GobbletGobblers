@@ -6,7 +6,8 @@ import tkinter.font as tkFont
 import sys, time
 
 #____Variables globales_____
-
+global win
+win=False
 choix="menu"
 stop=False
 mode = "Joueur VS Joueur" #par défaut
@@ -153,7 +154,7 @@ class Bac_a_sable(Canvas):
 				whatCase(event.x , event.y)
 
 			affichePlateau()
-
+			StopForWin()
 def checkVictoire():
 	verifVictoire()
 	if (victoire) :
@@ -227,8 +228,8 @@ def IAplus():
 
 		lignesJoueur = calculNbPiecesBleues() #renvoie la liste des lignes où le joueur a 2 pièces alignées
 		print("Lignes joueur : ", lignesJoueur)
-
-		if (canAddOne(listePiecesIA) and len(listePiecesIA) > 0):
+		global win
+		if (canAddOne(listePiecesIA) and len(listePiecesIA) > 0 and win==False):
 			last = len(listePiecesIA)-1
 			plusGrossePiece = listePiecesIA[last]
 			for ligne in lignesJoueur:
@@ -430,6 +431,87 @@ def calculNbPiecesLigne(x,y,u,v,t,z,col):
 		if (getCouleur((t,z),getDernierePiece((t,z))) == col):
 			nb+=1
 	return nb
+def LineWinner(x,y,u,v,t,z, col):
+	global win
+	if(getDernierePiece((x,y))<= -1):
+		if(getNbPieces((u,v)) > 0 and getNbPieces((t,z)) > 0):
+			if(getCouleur((u,v),getDernierePiece((u,v)))== getCouleur((t,z),getDernierePiece((t,z))) and  getCouleur((u,v),getDernierePiece((u,v)))==2 ):
+
+				win=True
+	if(getDernierePiece((u,v))<= -1):
+		if(getNbPieces((x,y)) > 0 and getNbPieces((t,z)) > 0):
+			if(getCouleur((x,y),getDernierePiece((x,y)))== getCouleur((t,z),getDernierePiece((t,z))) and  getCouleur((x,y),getDernierePiece((x,y)))==2 ):
+				win=True
+
+	if(getDernierePiece((t,z))<= -1):
+		if(getNbPieces((u,v)) > 0 and getNbPieces((x,y)) > 0):
+			if(getCouleur((u,v),getDernierePiece((u,v)))== getCouleur((x,y),getDernierePiece((x,y))) and  getCouleur((x,y),getDernierePiece((x,y)))==2 ):
+				win=True
+
+	if(getNbPieces((x,y)) > 0):
+		c1 = getCouleur((x,y),getDernierePiece((x,y)))
+		if(getNbPieces((u,v)) > 0):
+			c2 = getCouleur((u,v),getDernierePiece((u,v)))
+			if(getNbPieces((t,z)) > 0):
+				c3 = getCouleur((t,z),getDernierePiece((t,z)))
+				if( c1==col and c1 == c2 and c2 != c3):
+					if (getDernierePiece((x,y))!=3 or getDernierePiece((u,v))!=3):
+						
+						print("----------------------")
+
+
+						win= True
+	if(getNbPieces((u,v)) > 0):
+		c1 = getCouleur((u,v),getDernierePiece((u,v)))
+		if(getNbPieces((x,y)) > 0):
+			c2 = getCouleur((x,y),getDernierePiece((x,y)))
+			if(getNbPieces((t,z)) > 0):
+				c3 = getCouleur((t,z),getDernierePiece((t,z)))
+				if( c1==col and c1 == c2 and c2 != c3):
+					if (getDernierePiece((u,v))!=3 or getDernierePiece((x,y))!=3):
+
+						print("----------------------")
+
+
+						win= True	
+	if(getNbPieces((t,z)) > 0):
+		c1 = getCouleur((t,z),getDernierePiece((t,z)))
+		if(getNbPieces((u,v)) > 0):
+			c2 = getCouleur((u,v),getDernierePiece((u,v)))
+			if(getNbPieces((x,y)) > 0):
+				c3 = getCouleur((x,y),getDernierePiece((x,y)))
+				if( c1==col and c1 == c2 and c2 != c3):
+					if (getDernierePiece((t,z))!=3 or getDernierePiece((u,v))!=3):
+
+						print("----------------------")
+
+
+						win= True
+
+
+	print("win =", win)	
+
+
+def StopForWin():
+	"""Lignes horizontales :
+	LineWinner(0,0,1,0,2,0,2)
+	LineWinner(0,0,2,0,1,0,2)
+	LineWinner(2,0, 0,0,1,0,2)
+	LineWinner(2,0,1,0, 0,0,2)
+	LineWinner(1,0,0,0, 2,0,2)
+	LineWinner(1,0, 2,0, 0,0,2)"""
+
+	LineWinner(0,0,1,0,2,0,2)
+	LineWinner(0,1,1,1,2,1,2)
+	LineWinner(0,2,1,2,2,2,2)
+	#Lignes verticales :
+	LineWinner(0,0,0,1,0,2,2)
+	LineWinner(1,0,1,1,1,2,2)
+	LineWinner(2,0,2,1,2,2,2)
+	#Diagonales :
+	LineWinner(0,0,1,1,2,2,2)
+	LineWinner(2,0,1,1,0,2,2)
+
 
 def calculNbPiecesRouges():
 	#Lignes horizontales :
@@ -715,11 +797,12 @@ def Effacer():
 	Canevas.delete(ALL)
 
 def rejouer():
-	global victoire, coupsJ1, coupsJ2, couleurJoueur, listePiecesIA3
+	global victoire, coupsJ1, coupsJ2, couleurJoueur, listePiecesIA3, win
 	Effacer()
 	listePiecesIA3 = []
 	couleurJoueur='blue'
 	tourJoueur='Joueur 1'
+	win=False
 	coupsJ1=0
 	coupsJ2=0
 	initPlateau() #On refait un nouveau plateau
@@ -1091,3 +1174,4 @@ if __name__ == '__main__':
 			label = Label(menu2)
 			label.pack()
 			menu2.mainloop()
+
