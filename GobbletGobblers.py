@@ -10,7 +10,7 @@ global win
 win=False
 choix="menu"
 stop=False
-mode = "Joueur VS Joueur" #par défaut
+mode = "Joueur VS Ordinateur 2" #par défaut
 coupsJ2=0
 coupsJ1=0
 couleurJoueur='blue'
@@ -103,6 +103,7 @@ class Bac_a_sable(Canvas):
 				self.x1, self.y1 = x2, y2
 	def mouseUp(self, event):
 		"Op. à effectuer quand le bouton gauche de la souris est relâché"
+
 		if (couleurJoueur==self.itemcget(self.selObject, "fill")) :
 			if self.selObject :
 				if canAdd(whatCase(event.x , event.y), taille(self.coords(self.selObject))) == False  :
@@ -153,7 +154,7 @@ class Bac_a_sable(Canvas):
 			else:
 				whatCase(event.x , event.y)
 
-			affichePlateau()
+			#affichePlateau()
 			StopForWin()
 def checkVictoire():
 	verifVictoire()
@@ -227,7 +228,7 @@ def IAplus():
 		#Mode Défense (l'IA bloque le joueur s'il aligne 2 pièces, et s'il peut rien faire il passe en mode attaque)
 
 		lignesJoueur = calculNbPiecesBleues() #renvoie la liste des lignes où le joueur a 2 pièces alignées
-		print("Lignes joueur : ", lignesJoueur)
+		#print("Lignes joueur : ", lignesJoueur)
 		global win
 		if (canAddOne(listePiecesIA) and len(listePiecesIA) > 0 and win==False):
 			last = len(listePiecesIA)-1
@@ -288,6 +289,8 @@ def IAplus():
 						piecePlacee = True
 
 		else:
+			searchPiece()
+			"""
 			listeIA4 = []
 			listeIA4 = deplacementsPossibles(2,listePiecesIA3)
 			tirage = randrange(0,len(listeIA4))  #Tirage au sort d'une pièce parmi les pièces placées
@@ -308,7 +311,7 @@ def IAplus():
 			print( "TEST DELETE", whatCase(ancienneCaseX,ancienneCaseY))
 			print("case après delete : ",plateau[whatCase(ancienneCaseX,ancienneCaseY)])
 			setCase(cleHasard, 2, taillePieceHasard) #On met les données dans le plateau
-			piecePlacee = True
+			piecePlacee = True"""
 
 		#Mode Attaque (l'IA place ses pièces dans le but de gagner, il essaye d'aligner une ligne)
 		
@@ -375,7 +378,7 @@ def IAplus():
 							setCase(ligne[2], 2, plusGrossePiece[1])
 							piecePlacee = True
 
-				if (piecePlacee == False): #Si après avoir testé toutes les lignes possibles, aucun cas n'est envisageable, on place alors une case au hasard
+				if (piecePlacee == False ): #Si après avoir testé toutes les lignes possibles, aucun cas n'est envisageable, on place alors une case au hasard
 					tirage = randrange(0,len(listePiecesIA))
 					piece = listePiecesIA[tirage]
 					listePiecesIA.remove(piece)
@@ -407,7 +410,107 @@ def deplacementsPossibles(col, l):
 				#print("coords", Canevas.coords(piece))
 						res.append(piece)
 	return res
-	
+
+
+
+def deplacementsPossiblesPiece(col, piece):
+#Cette fonction renvoie seulement la liste des déplacement possible pour une piece rouge  donnee
+	coordonnees = '012'
+	res = []
+	for i in list(coordonnees):
+		for j in list(coordonnees):
+			if (getNbPieces((int(i),int(j))) > 0):
+				if( getCouleur( (int(i),int(j)),getDernierePiece( (int(i),int(j)) )) != col and getTaille( (int(i),int(j) ),getDernierePiece( (int(i),int(j)) ))  < taille(Canevas.coords(piece)) ):
+				#print("coords", Canevas.coords(piece))
+					res.append((int(i),int(j)))
+				
+	return res
+
+def setCaseCopiePlateau(cle, couleur, taille):
+	global CopiePlateau
+	CopiePlateau[cle].append([couleur, taille])
+
+def getNbPiecesCopiePlateau(cle):
+	global CopiePlateau
+	return len(plateau[cle])
+
+def getCouleurCopiePlateau(cle,numPiece):
+	global CopiePlateau
+	return CopiePlateau[cle][numPiece][0]
+
+def getTailleCopiePlateau(cle,numPiece):
+	global CopiePlateau
+	return CopiePlateau[cle][numPiece][1]
+
+def getDernierePieceCopiePlateau(cle):
+	return getNbPiecesCopiePlateau(cle)-1
+
+
+
+def checkLigneCopiePlateau(x,y,u,v,t,z):
+	global victoire
+	global gagnant
+	if(getNbPiecesCopiePlateau((x,y)) > 0):
+		c1 = getCouleurCopiePlateau((x,y),getDernierePieceCopiePlateau((x,y)))
+		if(getNbPiecesCopiePlateau((u,v)) > 0):
+			c2 = getCouleur((u,v),getDernierePieceCopiePlateau((u,v)))
+			if(getNbPiecesCopiePlateau((t,z)) > 0):
+				c3 = getCouleurCopiePlateau((t,z),getDernierePieceCopiePlateau((t,z)))
+				if(c1 == c2 and c2 == c3):
+					return True
+	else:
+		return False
+
+def verifVictoireCopiePlateau():
+	#Lignes horizontales :
+	checkLigneCopiePlateau(0,0,1,0,2,0)
+	checkLigneCopiePlateau(0,1,1,1,2,1)
+	checkLigneCopiePlateau(0,2,1,2,2,2)
+	#Lignes verticales :
+	checkLigneCopiePlateau(0,0,0,1,0,2)
+	checkLigneCopiePlateau(1,0,1,1,1,2)
+	checkLigneCopiePlateau(2,0,2,1,2,2)
+	#Diagonales :
+	checkLigneCopiePlateau(0,0,1,1,2,2)
+	checkLigneCopiePlateau(2,0,1,1,0,2)
+
+			
+#cette fonction va chercher s'il existe une piece à déplacer pour gagner la partie
+def searchPiece():
+	print("je suis dans search")
+	listePieces = []
+	listePieces= deplacementsPossibles(2,listePiecesIA3)
+
+	for piece in listePieces :
+			global plateau
+			global CopiePlateau
+			CopiePlateau=plateau
+			CleDeplacementPossible=deplacementsPossiblesPiece(2, piece)
+			for deplacement in CleDeplacementPossible:
+				taillePiece = taille(Canevas.coords(piece))
+				cle= deplacement
+				ancienneCaseX = Canevas.coords(piece)[0]
+				ancienneCaseY = Canevas.coords(piece)[1]
+				#print("case avant delete : ",plateau[whatCase(ancienneCaseX, ancienneCaseY)])
+				setCaseCopiePlateau(cle, 2, taille)
+				if (verifVictoireCopiePlateau()==True):
+					#deleteDernierePiece( whatCase(ancienneCaseX, ancienneCaseY))
+					#placerPiece(cle, taillePiece, piece) #Deplacement de la pièce tirée au sort vers la clé tirée au sort
+					print("j'ai trouvé une case gagnante et je vais gagné en ", deplacement)
+					#setCase(cleHasard, 2, taillePieceHasard) #On met les données dans le plateau
+					#piecePlacee = True
+				else:
+					global copiePlateau
+					CopiePlateau= plateau			
+					print("aucun deplacement trouvé je remet la copie a etat plateau")
+
+
+
+
+
+
+
+
 
 def canAddOne(liste):
 	coordonnees = '012'
@@ -456,11 +559,8 @@ def LineWinner(x,y,u,v,t,z, col):
 				c3 = getCouleur((t,z),getDernierePiece((t,z)))
 				if( c1==col and c1 == c2 and c2 != c3):
 					if (getDernierePiece((x,y))!=3 or getDernierePiece((u,v))!=3):
-						
-						print("----------------------")
-
-
 						win= True
+
 	if(getNbPieces((u,v)) > 0):
 		c1 = getCouleur((u,v),getDernierePiece((u,v)))
 		if(getNbPieces((x,y)) > 0):
@@ -469,10 +569,6 @@ def LineWinner(x,y,u,v,t,z, col):
 				c3 = getCouleur((t,z),getDernierePiece((t,z)))
 				if( c1==col and c1 == c2 and c2 != c3):
 					if (getDernierePiece((u,v))!=3 or getDernierePiece((x,y))!=3):
-
-						print("----------------------")
-
-
 						win= True	
 	if(getNbPieces((t,z)) > 0):
 		c1 = getCouleur((t,z),getDernierePiece((t,z)))
@@ -482,10 +578,6 @@ def LineWinner(x,y,u,v,t,z, col):
 				c3 = getCouleur((x,y),getDernierePiece((x,y)))
 				if( c1==col and c1 == c2 and c2 != c3):
 					if (getDernierePiece((t,z))!=3 or getDernierePiece((u,v))!=3):
-
-						print("----------------------")
-
-
 						win= True
 
 
@@ -493,13 +585,6 @@ def LineWinner(x,y,u,v,t,z, col):
 
 
 def StopForWin():
-	"""Lignes horizontales :
-	LineWinner(0,0,1,0,2,0,2)
-	LineWinner(0,0,2,0,1,0,2)
-	LineWinner(2,0, 0,0,1,0,2)
-	LineWinner(2,0,1,0, 0,0,2)
-	LineWinner(1,0,0,0, 2,0,2)
-	LineWinner(1,0, 2,0, 0,0,2)"""
 
 	LineWinner(0,0,1,0,2,0,2)
 	LineWinner(0,1,1,1,2,1,2)
