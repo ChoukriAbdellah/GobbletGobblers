@@ -19,6 +19,8 @@ gagnant="personne"
 texte = ""
 listePiecesIA3 = []
 plateau = {}
+global CopiePlateau
+CopiePlateau={}
 
 def initialiserListeIA():
 	global listePiecesIA
@@ -155,6 +157,8 @@ class Bac_a_sable(Canvas):
 				whatCase(event.x , event.y)
 
 			#affichePlateau()
+			global plateau, CopiePlateau
+
 			StopForWin()
 def checkVictoire():
 	verifVictoire()
@@ -230,7 +234,7 @@ def IAplus():
 		lignesJoueur = calculNbPiecesBleues() #renvoie la liste des lignes où le joueur a 2 pièces alignées
 		#print("Lignes joueur : ", lignesJoueur)
 		global win
-		if (canAddOne(listePiecesIA) and len(listePiecesIA) > 0 and win==False):
+		if (canAddOne(listePiecesIA) and len(listePiecesIA) > 0 ):
 			last = len(listePiecesIA)-1
 			plusGrossePiece = listePiecesIA[last]
 			for ligne in lignesJoueur:
@@ -321,7 +325,7 @@ def IAplus():
 				lignesPossibles = calculNbPiecesRouges() #renvoie la liste des lignes possibles (une ligne possible = une liste où l'IA a posé le + de pièces)
 				last = len(listePiecesIA)-1
 				plusGrossePiece = listePiecesIA[last]
-				print("Lignes possibles : ", lignesPossibles)
+				#print("Lignes possibles : ", lignesPossibles)
 
 				for ligne in lignesPossibles:
 					if(getNbPieces(ligne[0]) > 0):
@@ -378,7 +382,7 @@ def IAplus():
 							setCase(ligne[2], 2, plusGrossePiece[1])
 							piecePlacee = True
 
-				if (piecePlacee == False ): #Si après avoir testé toutes les lignes possibles, aucun cas n'est envisageable, on place alors une case au hasard
+				if (piecePlacee == False  ): #Si après avoir testé toutes les lignes possibles, aucun cas n'est envisageable, on place alors une case au hasard
 					tirage = randrange(0,len(listePiecesIA))
 					piece = listePiecesIA[tirage]
 					listePiecesIA.remove(piece)
@@ -422,7 +426,7 @@ def deplacementsPossiblesPiece(col, piece):
 			if (getNbPieces((int(i),int(j))) > 0):
 				if( getCouleur( (int(i),int(j)),getDernierePiece( (int(i),int(j)) )) != col and getTaille( (int(i),int(j) ),getDernierePiece( (int(i),int(j)) ))  < taille(Canevas.coords(piece)) ):
 				#print("coords", Canevas.coords(piece))
-					res.append((int(i),int(j)))
+					res.append((  int(i) ,  int(j) ))
 				
 	return res
 
@@ -446,23 +450,25 @@ def getDernierePieceCopiePlateau(cle):
 	return getNbPiecesCopiePlateau(cle)-1
 
 
-
+global caseGagnante
+caseGagnante= False
 def checkLigneCopiePlateau(x,y,u,v,t,z):
-	global victoire
-	global gagnant
+	
+
 	if(getNbPiecesCopiePlateau((x,y)) > 0):
 		c1 = getCouleurCopiePlateau((x,y),getDernierePieceCopiePlateau((x,y)))
 		if(getNbPiecesCopiePlateau((u,v)) > 0):
 			c2 = getCouleur((u,v),getDernierePieceCopiePlateau((u,v)))
 			if(getNbPiecesCopiePlateau((t,z)) > 0):
 				c3 = getCouleurCopiePlateau((t,z),getDernierePieceCopiePlateau((t,z)))
-				if(c1 == c2 and c2 == c3):
-					return True
-	else:
-		return False
+				if(c1 == c2 and c2 == c3 and c3==2):
+					global caseGagnante
+					caseGagnante= True
+
 
 def verifVictoireCopiePlateau():
 	#Lignes horizontales :
+
 	checkLigneCopiePlateau(0,0,1,0,2,0)
 	checkLigneCopiePlateau(0,1,1,1,2,1)
 	checkLigneCopiePlateau(0,2,1,2,2,2)
@@ -477,33 +483,37 @@ def verifVictoireCopiePlateau():
 			
 #cette fonction va chercher s'il existe une piece à déplacer pour gagner la partie
 def searchPiece():
-	print("je suis dans search")
 	listePieces = []
 	listePieces= deplacementsPossibles(2,listePiecesIA3)
 
+
+	global CopiePlateau
+	#print("je suis dans chercher piece  gagnante")
+	print(" piece a deplacer ",listePieces )
 	for piece in listePieces :
 			global plateau
-			global CopiePlateau
 			CopiePlateau=plateau
 			CleDeplacementPossible=deplacementsPossiblesPiece(2, piece)
+			print("deplacement possible :", CleDeplacementPossible)
 			for deplacement in CleDeplacementPossible:
 				taillePiece = taille(Canevas.coords(piece))
 				cle= deplacement
 				ancienneCaseX = Canevas.coords(piece)[0]
 				ancienneCaseY = Canevas.coords(piece)[1]
 				#print("case avant delete : ",plateau[whatCase(ancienneCaseX, ancienneCaseY)])
-				setCaseCopiePlateau(cle, 2, taille)
-				if (verifVictoireCopiePlateau()==True):
-					#deleteDernierePiece( whatCase(ancienneCaseX, ancienneCaseY))
-					#placerPiece(cle, taillePiece, piece) #Deplacement de la pièce tirée au sort vers la clé tirée au sort
+				setCaseCopiePlateau(cle, 2, taillePiece)
+				verifVictoireCopiePlateau()
+				global caseGagnante
+				if (caseGagnante==True):
+					deleteDernierePiece( whatCase(ancienneCaseX, ancienneCaseY))
+					placerPiece(cle, taillePiece, piece) #Deplacement de la pièce tirée au sort vers la clé tirée au sort
 					print("j'ai trouvé une case gagnante et je vais gagné en ", deplacement)
-					#setCase(cleHasard, 2, taillePieceHasard) #On met les données dans le plateau
-					#piecePlacee = True
+					setCase(cle, 2, taillePiece) #On met les données dans le plateau
+					piecePlacee = True
 				else:
 					global copiePlateau
 					CopiePlateau= plateau			
-					print("aucun deplacement trouvé je remet la copie a etat plateau")
-
+					print("remise a  plateau et piece en cours=",piece, "deplacement :", deplacement, "caseGagnante= ",caseGagnante)
 
 
 
@@ -581,7 +591,7 @@ def LineWinner(x,y,u,v,t,z, col):
 						win= True
 
 
-	print("win =", win)	
+	#print("win =", win)	
 
 
 def StopForWin():
