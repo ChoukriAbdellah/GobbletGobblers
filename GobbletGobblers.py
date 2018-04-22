@@ -501,7 +501,7 @@ def searchPiece():
 						listeIA4 = []
 						listeIA4 = deplacementsPossibles(2,listePiecesIA3)
 						if(getTaille( ( int(cle2[0]) ,int(cle2[1])  ),getDernierePiece( ( int(cle2[0]) ,int(cle2[1])  ))) <3 ):
-							if(getTaille( ( int(cle0[0]) ,int(cle0[1])  ),getDernierePiece( ( int(cle0[0]) ,int(cle0[1])  ))) !=3  or  ( getTaille( ( int(cle1[0]) ,int(cle1[1])  ),getDernierePiece( ( int(cle1[0]) ,int(cle1[1])  ))))  ):
+							if(getTaille( ( int(cle0[0]) ,int(cle0[1])  ),getDernierePiece( ( int(cle0[0]) ,int(cle0[1])  ))) !=3  or  ( getTaille( ( int(cle1[0]) ,int(cle1[1])  ),getDernierePiece( ( int(cle1[0]) ,int(cle1[1])  ))) !=3)  :
 								tirage = randrange(0,len(listeIA4))
 								piece = listeIA4[tirage]
 								taillePiece = taille(Canevas.coords(piece))
